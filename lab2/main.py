@@ -1,7 +1,7 @@
 import csv
 import sys
-import networkx as nx
 
+import networkx as nx
 
 def read_mealy_csv(file):
     with open(file, newline='\n') as f:
@@ -84,10 +84,12 @@ def cluster_by(graph: nx.DiGraph, key):
     synthetic_i = 1
 
     for node in graph.nodes:
+        node_data = graph.nodes[node]
+        group_attachment = [node_data['group']] if 'group' in node_data else []
         node_transitions = tuple(sorted(
             map(get_signals, graph.out_edges(node, data=True)),
             key=get_first
-        ))
+        ) + group_attachment)
 
         chain = clusters.get(node_transitions, [])
         chain.append(node)
@@ -99,7 +101,34 @@ def cluster_by(graph: nx.DiGraph, key):
             synthetic_i += 1
         clusters_names[node_transitions] = group_name
 
-        graph.nodes[node]['group'] = group_name
+        node_data['group'] = group_name
+
+    for transition in graph.edges:
+        graph.edges[transition[0], transition[1]]['group_out'] = graph.nodes[transition[1]]['group']
+
+    return list(clusters_names.values()), clusters.values()
+
+
+def cluster_by_nodes(graph: nx.DiGraph, key):
+    clusters = dict()
+    clusters_names = dict()
+
+    synthetic_i = 1
+
+    for node in graph.nodes(data=True):
+        search_key = node[1][key]
+
+        chain = clusters.get(search_key, [])
+        chain.append(node[0])
+        clusters[search_key] = chain
+
+        group_name = clusters_names.get(search_key)
+        if group_name is None:
+            group_name = 'X' + str(synthetic_i)
+            synthetic_i += 1
+        clusters_names[search_key] = group_name
+
+        graph.nodes[node[0]]['group'] = group_name
 
     for transition in graph.edges:
         graph.edges[transition[0], transition[1]]['group_out'] = graph.nodes[transition[1]]['group']
@@ -127,13 +156,7 @@ def optimize_mealy(graph: nx.DiGraph) -> nx.DiGraph:
 
 
 def optimize_moore(graph: nx.DiGraph) -> nx.DiGraph:
-    for state in graph.nodes:
-        graph.nodes[state]['group'] = graph.nodes[state]['out_signal']
-
-    for transition in graph.edges:
-        graph.edges[transition[0], transition[1]]['group_out'] = graph.nodes[transition[1]]['group']
-
-    clusters, last_cluster_groups = [], []
+    clusters, last_cluster_groups = cluster_by_nodes(graph, 'out_signal')
     prev_clusters = []
     while len(clusters) != len(prev_clusters) or len(clusters) == 0:
         prev_clusters = clusters
