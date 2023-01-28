@@ -29,10 +29,17 @@ def generate_renderable_finite_automata(graph: nx.MultiDiGraph):
 
 
 def parse_line(line: str):
+    line = line.replace(" ", "")
     node, states_line = line.split('->')
-    transitions = list(map(lambda state: (state, 'F') if len(state) == 1 else tuple(state), [states_line.strip() for state in states_line.split('|')]))
+    transitions = list(map(lambda state: (state, 'F') if len(state) == 1 else tuple(state), [state.strip() for state in states_line.split('|')]))
     return node, transitions
 
+def add_is_final_attribute(G: nx.MultiDiGraph) -> None:
+    for node in G.nodes():
+        if node == "F":
+            G.nodes[node]['is_final'] = True
+        else:
+            G.nodes[node]['is_final'] = False
 
 def create_nfa_text(fileName):
     graph = nx.MultiDiGraph()
@@ -41,7 +48,9 @@ def create_nfa_text(fileName):
             node, transitions = parse_line(line)
             for transition in transitions:
                 graph.add_edge(node, transition[1], signal=transition[0])
-    generate_renderable_finite_automata(graph).view()
+            print(node, transitions)
+    #generate_renderable_finite_automata(graph).view()
+    return graph
 
 
 def read_nfa_csv(file):
@@ -129,7 +138,6 @@ def determine_machine(graph: nx.MultiDiGraph):
     result.add_node(get_state_name(initial_states), is_final=any(graph.nodes[out]['is_final'] for out in initial_states))
     while len(state_queue) > 0:
         state = state_queue.pop(0)
-
         state_name = get_state_name(state)
 
         sum_outs = dict()
@@ -167,7 +175,14 @@ if __name__ == '__main__':
         exit_help()
 
     if args[0] == 'right':
-        create_nfa_text(args[1])
+        nfa = create_nfa_text(args[1])
+        add_is_final_attribute(nfa)
+        dfa, naming = determine_machine(nfa)
+        for states, to_state in naming.items():
+            print(to_state + " -> " + str(states))
+        write_dfa_csv(dfa, args[2])
+
+        #print('OK ' + str(len(dfa.nodes)) + " states")
 
     print('OK')
 
