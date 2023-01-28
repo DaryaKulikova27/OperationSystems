@@ -6,7 +6,6 @@ import ru.dasha.lexer.token.TokenType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -50,7 +49,7 @@ public class Lexer {
     int lexLine = currLine;
     int lexColumn = currColumn;
     boolean skipReading = false;
-    boolean afterSpace = false;
+    boolean afterDrop = false;
     ArrayList<Token> tokens = new ArrayList<>();
 
     public Lexer(BufferedReader reader) {
@@ -188,10 +187,12 @@ public class Lexer {
         if (isSpace()) {
             l("space", currentBuffer, current);
             dropBuffer();
-            afterSpace = true;
+            afterDrop = true;
         }
-        else if (MONO_TERMINALS_MAP.containsKey(current))
+        else if (MONO_TERMINALS_MAP.containsKey(current)) {
             makeToken(MONO_TERMINALS_MAP.get(current));
+            afterDrop = true;
+        }
         else if (isAlpha() || current == '_')
             return State.IDENTIFIER;
         else if (isDigit())
@@ -239,8 +240,8 @@ public class Lexer {
             setState(State.END);
         }
         current = (char) read;
-        if (afterSpace) {
-            afterSpace = false;
+        if (afterDrop) {
+            afterDrop = false;
             lexLine = currLine;
             lexColumn = currColumn;
         }
