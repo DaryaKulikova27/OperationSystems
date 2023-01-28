@@ -49,7 +49,7 @@ public class Lexer {
     int lexLine = currLine;
     int lexColumn = currColumn;
     boolean skipReading = false;
-    boolean afterDrop = false;
+    boolean afterToken = false;
     ArrayList<Token> tokens = new ArrayList<>();
 
     public Lexer(BufferedReader reader) {
@@ -187,12 +187,10 @@ public class Lexer {
         if (isSpace()) {
             l("space", currentBuffer, current);
             dropBuffer();
-            afterDrop = true;
+            afterToken = true;
         }
-        else if (MONO_TERMINALS_MAP.containsKey(current)) {
+        else if (MONO_TERMINALS_MAP.containsKey(current))
             makeToken(MONO_TERMINALS_MAP.get(current));
-            afterDrop = true;
-        }
         else if (isAlpha() || current == '_')
             return State.IDENTIFIER;
         else if (isDigit())
@@ -240,8 +238,8 @@ public class Lexer {
             setState(State.END);
         }
         current = (char) read;
-        if (afterDrop) {
-            afterDrop = false;
+        if (afterToken) {
+            afterToken = false;
             lexLine = currLine;
             lexColumn = currColumn;
         }
@@ -254,6 +252,7 @@ public class Lexer {
         dropBuffer();
         if (skipReading)
             currentBuffer.append(current);
+        afterToken = true;
     }
 
     private void dropCurrent() {
