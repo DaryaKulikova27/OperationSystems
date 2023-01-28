@@ -50,6 +50,7 @@ public class Lexer {
     int lexLine = currLine;
     int lexColumn = currColumn;
     boolean skipReading = false;
+    boolean afterSpace = false;
     ArrayList<Token> tokens = new ArrayList<>();
 
     public Lexer(BufferedReader reader) {
@@ -187,6 +188,7 @@ public class Lexer {
         if (isSpace()) {
             l("space", currentBuffer, current);
             dropBuffer();
+            afterSpace = true;
         }
         else if (MONO_TERMINALS_MAP.containsKey(current))
             makeToken(MONO_TERMINALS_MAP.get(current));
@@ -237,7 +239,8 @@ public class Lexer {
             setState(State.END);
         }
         current = (char) read;
-        if (currentBuffer.length() == 0) {
+        if (afterSpace) {
+            afterSpace = false;
             lexLine = currLine;
             lexColumn = currColumn;
         }
@@ -263,10 +266,15 @@ public class Lexer {
 
     void setState(State state) {
         this.state = state;
+        if (skipReading)
+        {
+            lexLine = currLine;
+            lexColumn = currColumn;
+        }
     }
 
     private <T> T l(T... t) {
-        //System.out.println(Arrays.toString(t));
+//        System.out.println(Arrays.toString(t));
         return t[0];
     }
 

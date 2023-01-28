@@ -11,8 +11,15 @@ public class Main {
         Lexer lexer = new Lexer(new BufferedReader(new FileReader("pascal/test0.pas")));
         ArrayList<Token> lex = lexer.lex();
 
-        for (Token token : lex)
+        PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
+
+
+        for (Token token : lex) {
+            writer.println(token);
             System.out.println(token);
+
+        }
+        writer.close();
     }
 
 }
