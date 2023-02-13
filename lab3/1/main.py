@@ -9,8 +9,8 @@ class MachineRendererWrapper:
     def __init__(self, comment):
         self.document = graphviz.Digraph(comment=comment)
 
-    def add_state(self, name: str, ext: str):
-        self.document.node(name, ext)
+    def add_state(self, name: str, ext: str, per: str = '1'):
+        self.document.node(name, ext, peripheries=per)
 
     def add_transition(self, src: str, dest: str, label: str):
         self.document.edge(src, dest, label)
@@ -22,7 +22,7 @@ class MachineRendererWrapper:
 def generate_renderable_finite_automata(graph: nx.MultiDiGraph):
     render = MachineRendererWrapper("Finite Automata")
     for state in graph.nodes(data=True):
-        render.add_state(state[0], state[0])
+        render.add_state(state[0], state[0], '2' if state[1]['is_final'] else '1')
     for tr in graph.edges(data=True):
         render.add_transition(tr[0], tr[1], tr[2]['signal'])
     return render
@@ -51,7 +51,6 @@ def create_nfa_text(fileName):
             print(node, transitions)
     #generate_renderable_finite_automata(graph).view()
     return graph
-
 
 def read_nfa_csv(file):
     with open(file, newline='\n') as f:
@@ -171,18 +170,22 @@ def exit_help():
 if __name__ == '__main__':
     args = sys.argv[1:]
 
-    if len(args) != 3:
-        exit_help()
 
-    if args[0] == 'right':
-        nfa = create_nfa_text(args[1])
-        add_is_final_attribute(nfa)
-        dfa, naming = determine_machine(nfa)
-        for states, to_state in naming.items():
-            print(to_state + " -> " + str(states))
-        write_dfa_csv(dfa, args[2])
+    # if len(args) != 3:
+    #     exit_help()
+    #
+    # if args[0] == 'right':
+    #     nfa = create_nfa_text(args[1])
+    #     add_is_final_attribute(nfa)
+    #     dfa, naming = determine_machine(nfa)
+    #     for states, to_state in naming.items():
+    #         print(to_state + " -> " + str(states))
+    #     write_dfa_csv(dfa, args[2])
+    #
+    #     #print('OK ' + str(len(dfa.nodes)) + " states")
 
-        #print('OK ' + str(len(dfa.nodes)) + " states")
+    nfa = read_nfa_csv(args[0])
+    generate_renderable_finite_automata(nfa).view()
 
     print('OK')
 

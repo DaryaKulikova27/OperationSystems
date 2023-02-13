@@ -10,21 +10,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\input-mealy.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value=";" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\input-moore.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value=";" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\moore.csv">
+        <entry key="\input.csv">
           <value>
             <Attribute>
               <option name="separator" value=";" />
