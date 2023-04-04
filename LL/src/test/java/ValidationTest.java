@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidationTest {
-    private final List<State> stateList = StateReader.readStates("states2.csv");
+    private final List<State> stateList = StateReader.readStates("tabl2.csv");
     private final Validator validator = new Validator(stateList);
 
     public ValidationTest() throws IOException {

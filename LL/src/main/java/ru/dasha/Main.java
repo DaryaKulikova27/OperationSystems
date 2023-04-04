@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        List<State> states = StateReader.readStates("states.csv");
+        List<State> states = StateReader.readStates("tabl2.csv");
 
         Validator validator = new Validator(states);
 
